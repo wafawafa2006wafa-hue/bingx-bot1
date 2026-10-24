@@ -4,8 +4,8 @@ import requests
 
 app = Flask(__name__)
 
-# التوكن الصحيح الخاص بك
-TOKEN = "8714328268:AAH1rnoFniR1QYjHxgw_cPqGLYJtzM3nN3k"
+# قراءة التوكن بأمان من إعدادات المنصة (Render)
+TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN")
 
 @app.route('/')
 def home():
@@ -19,7 +19,6 @@ def receive_update():
         text = data['message'].get('text', '')
         
         if text == '/start':
-            # رسالة الترحيب والأزرار
             send_welcome(chat_id)
             
     return {"status": "ok"}, 200
@@ -27,7 +26,6 @@ def receive_update():
 def send_welcome(chat_id):
     url = f"https://api.telegram.org/bot{TOKEN}/sendMessage"
     
-    # تصميم الأزرار التفاعلية
     keyboard = {
         "inline_keyboard": [
             [{"text": "📊 تحليل السوق الشامل", "callback_data": "market"}],
@@ -49,4 +47,3 @@ def send_welcome(chat_id):
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 10000))
     app.run(host='0.0.0.0', port=port)
-
