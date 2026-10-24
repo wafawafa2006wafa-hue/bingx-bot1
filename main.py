@@ -4,38 +4,49 @@ import requests
 
 app = Flask(__name__)
 
-# استبدل هذا التوكن بتوكن بوتك الحقيقي أو اتركه هكذا مؤقتاً
-TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN", "YOUR_BOT_TOKEN")
+# التوكن الصحيح الخاص بك
+TOKEN = "8714328268:AAH1rnoFniR1QYjHxgw_cPqGLYJtzM3nN3k"
 
 @app.route('/')
 def home():
-    return "BingX Bot is active and running 24/7!"
+    return "Bot is running successfully!"
 
-@app.route(f'/{TOKEN}', methods=['POST'])
-def webhook():
-    data = request.get_json()
+@app.route('/', methods=['POST'])
+def receive_update():
+    data = request.json
     if data and 'message' in data:
         chat_id = data['message']['chat']['id']
         text = data['message'].get('text', '')
         
         if text == '/start':
+            # رسالة الترحيب والأزرار
             send_welcome(chat_id)
             
-    return 'ok', 200
-
-def send_message(chat_id, text):
-    url = f"https://api.telegram.org/bot{TOKEN}/sendMessage"
-    payload = {"chat_id": chat_id, "text": text, "parse_mode": "Markdown"}
-    requests.post(url, json=payload)
+    return {"status": "ok"}, 200
 
 def send_welcome(chat_id):
-    msg = (
-        "🤖 *أهلاً بك يا سرار في نظام التداول والتحليل الشامل!*\n\n"
-        "✅ السيرفر يعمل الآن بنجاح تام 24/7.\n"
-        "📊 سيتم ربط الإشارات والأزرار فوراً."
-    )
-    send_message(chat_id, msg)
+    url = f"https://api.telegram.org/bot{TOKEN}/sendMessage"
+    
+    # تصميم الأزرار التفاعلية
+    keyboard = {
+        "inline_keyboard": [
+            [{"text": "📊 تحليل السوق الشامل", "callback_data": "market"}],
+            [{"text": "🪙 Bitcoin (BTC)", "callback_data": "btc"}, {"text": "💎 Ethereum (ETH)", "callback_data": "eth"}],
+            [{"text": "⚡ Solana (SOL)", "callback_data": "sol"}],
+            [{"text": "📈 S&P 500 Index", "callback_data": "sp500"}]
+        ]
+    }
+    
+    payload = {
+        "chat_id": chat_id,
+        "text": "🤖 **أهلاً بك مجدداً في مركز القيادة والتحليل الذكي**\n\nاختر من الأزرار بالأسفل لمتابعة السوق أو فحص العملات بدقة:",
+        "parse_mode": "Markdown",
+        "reply_markup": keyboard
+    }
+    
+    requests.post(url, json=payload)
 
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 10000))
     app.run(host='0.0.0.0', port=port)
+
